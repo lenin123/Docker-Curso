@@ -72,11 +72,44 @@ docker image rm id container
 
 # Detalhando Imagens
 docker image pull redis:latest #baixar imagen na sua versão
+docker image ls # para listar as imagens
+docker image rm redis:latest exemplo-redis-lenin #Removendo uma imagem pelo nome
 docker image inspect redis:latest #inspecionando imagen
 docker image tag redis:latest exemplo-redis-lenin #Criando uma imagem com nome
-docker image rm redis:latest exemplo-redis-lenin #Removendo uma imagem pelo nome
+docker image build # buildando a imagem
+docker image push # publicar no hambiente da empresa ou no docker hub
+
+# Criando Imagens
+# Criar uma pasta com um arquivo Dockerfile exatamente com esse nome como na pasta primeiro-build
+# Em seguida rodar os seguintes comandos
+docker image build -t primeiro-build . #criando imagem
+docker image ls #listando imagens disponíveis
+docker container run -p 8080:80 primeiro-build #criando container apartir da imagen criada
+
+# Criando uma imagen com argumentos
+# Criar uma pasta com um arquivo Dockerfile exatamente com esse nome como na pasta build-com-argumentos
+# Entrar na pasta e em seguida executar os seguintes comandos
+docker image build -t build-com-argumento . #criando imagem
+docker image ls #listando imagens disponíveis
+docker container run build-com-argumento bash -c 'echo $S3_BUCKET' #criando o container vendo a variavel default de argumento
+docker image build --build-arg S3_BUCKET=myapp -t  build-com-argumento . #Alterando o parametro da imagem default e atualizando a imagem
+
+# Criando uma imagen com copia
+# Criar uma pasta com um arquivo Dockerfile exatamente com esse nome como na pasta build-com-copia
+# Entrar na pasta e em seguida executar os seguintes comandos
+docker image build -t build-com-copia . #criando imagem
+docker image ls #listando imagens disponíveis
+docker container run -p 8080:80 build-com-copia
+
+# Criando uma imagem de servidor com uma página
+# Criar uma pasta com um arquivo Dockerfile exatamente com esse nome como na pasta build-dev
+# Entrar na pasta e em seguida executar os seguintes comandos
+docker image build -t build-dev .
+docker run -it -v (Get-Location).path:/app -p 80:8000 --name pyton-serve build-dev
 
 
-
-
+#Publicando uma imagen no docker hub
+docker image tag primeiro-build lmuller439/imagem-teste-docker-hub:1.0 #Criando uma tag da imagem com o nome do repositorio/seunome:versão
+docker login -u "lmuller439" -p "senha" docker.io # logando no docker hub
+docker push lmuller439/imagem-teste-docker-hub:1.0 # fazendo o push
 
