@@ -113,3 +113,45 @@ docker image tag primeiro-build lmuller439/imagem-teste-docker-hub:1.0 #Criando 
 docker login -u "lmuller439" -p "senha" docker.io # logando no docker hub
 docker push lmuller439/imagem-teste-docker-hub:1.0 # fazendo o push
 
+# Tipos de Resdes
+docker network ls
+docker network inspect bridge
+
+# criação de containers que não envolve conexão com rede None Network
+docker container run -d --net none debian
+docker container run --rm --net none alpine ash -c "ifconfig"
+
+# criação de containers do tipo bridge
+docker container run -d --name container-bridge-1 alpine sleep 1000
+docker container exec -it container-bridge-1 ifconfig
+docker container run -d --name container-bridge-2 alpine sleep 1000
+docker container exec -it container-bridge-2 ifconfig
+
+docker container exec -it container-bridge-1 ping 172.17.0.3
+docker container exec -it container-bridge-1 ping www.google.com
+
+# criando container em redes
+docker network create --driver bridge rede_nova_bridge #criando uma nova rede do tipo bridge
+docker network ls
+docker network inspect rede_nova_bridge
+docker container run -d --name container-bridge-nova-rede-1 --net rede_nova_bridge alpine sleep 1000 #criando um container novo na nova rede criada
+docker container exec -it container-bridge-nova-rede-1 ifconfig #verificando as configurações de redes do container criado
+docker network connect bridge container-bridge-nova-rede-1 # configurando para que o container tenha acesso interno como externo das redes bridge
+docker container exec -it container-bridge-nova-rede-1 ifconfig # verificando se a configuração de acesso a redes foi adicionado
+docker container exec -it container-bridge-nova-rede-1 ping 172.17.0.2 
+docker network disconnect bridge container-bridge-nova-rede-1 # desconectar a redes externas
+docker container exec -it container-bridge-nova-rede-1 ifconfig # verificando se foi desconectado a redes externas
+
+# Configurando multiplos containers
+docker-compose up # sobe os containers configurados nos arquivo yml da pasta node-mongo-compose
+
+# Exercicio Final e Conclusão
+docker-compose up -d #executar a aplicação em modo dimond(background)
+docker-compose ps #listar se existe processos rodando
+docker-compose down #parar os processos rodando
+docker-compose exec db psql -U postgres -c '\l' #listar a estrutura existente nesse container de banco de dados
+docker-compose exec db psql -U postgres -f /scripts/check.sql #executar script de check para ver a tabela e seus dados
+docker-compose logs -f -t #detalhamento dos containers executando e seus status
+docker-compose up -d --scale worker=3 #executar a aplicação em modo dimond(background) escalando o worker em 3 instancias de containers para tratar os envios de e-mail
+docker-compose logs -f -t worker #detalhando os logs de works
+docker-compose exec db psql -U postgres -d email_sender -c 'select * from emails' #Consulta os dados no container de banco de dados na tabela de email_sender
